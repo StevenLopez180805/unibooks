@@ -15,16 +15,25 @@ import { LibrosModule } from './libros/libros.module';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres',
-        host: config.get<string>('DATABASE_HOST'),
-        port: config.get<number>('DATABASE_PORT'),
-        username: config.get<string>('DATABASE_USERNAME'),
-        password: config.get<string>('DATABASE_PASSWORD'),
-        database: config.get<string>('DATABASE_NAME'),
-        autoLoadEntities: true,
-        synchronize: config.get<string>('NODE_ENV') !== 'production',
-      }),
+      useFactory: (config: ConfigService) => {
+        const databaseUrl = config.get<string>('DATABASE_URL');
+        
+        return {
+          type: 'postgres',
+          ...(databaseUrl ? { url: databaseUrl } : {
+            host: config.get<string>('DATABASE_HOST'),
+            port: config.get<number>('DATABASE_PORT'),
+            username: config.get<string>('DATABASE_USERNAME'),
+            password: config.get<string>('DATABASE_PASSWORD'),
+            database: config.get<string>('DATABASE_NAME'),
+          }),
+          autoLoadEntities: true,
+          synchronize: false, // Deshabilitado para usar migraciones
+          migrations: ['dist/migrations/*.js'],
+          migrationsRun: config.get<string>('NODE_ENV') === 'production', // Ejecutar migraciones automáticamente en producción
+          logging: config.get<string>('NODE_ENV') === 'development',
+        };
+      },
     }),
     UsersModule,
     AuthModule,
