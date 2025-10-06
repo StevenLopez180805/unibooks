@@ -27,21 +27,76 @@
 
 ## Project setup
 
+### 1. Instalar dependencias
 ```bash
 $ npm install
+```
+
+### 2. Configurar variables de entorno
+Copia el archivo `env.example` a `.env` y configura las variables:
+
+```bash
+$ cp env.example .env
+```
+
+Edita el archivo `.env` con tus credenciales de base de datos:
+
+```env
+# Base de datos local
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_USERNAME=tu_usuario
+DATABASE_PASSWORD=tu_password
+DATABASE_NAME=unibooks
+
+# JWT
+JWT_SECRET=tu_clave_secreta_muy_segura
+JWT_EXPIRES_IN=24h
+
+# Entorno
+NODE_ENV=development
+```
+
+### 3. Configurar base de datos PostgreSQL
+Asegúrate de tener PostgreSQL instalado y ejecutándose. Crea la base de datos:
+
+```sql
+CREATE DATABASE unibooks;
+```
+
+### 4. Ejecutar migraciones (para desarrollo)
+```bash
+# Ejecutar migraciones para crear las tablas
+$ npm run migration:run
 ```
 
 ## Compile and run the project
 
 ```bash
+# development (modo watch)
+$ npm run start:dev
+
 # development
 $ npm run start
 
-# watch mode
-$ npm run start:dev
-
 # production mode
 $ npm run start:prod
+```
+
+## Comandos de Migración
+
+```bash
+# Ejecutar migraciones
+$ npm run migration:run
+
+# Revertir última migración
+$ npm run migration:revert
+
+# Ver estado de migraciones
+$ npm run migration:show
+
+# Generar nueva migración
+$ npm run migration:generate -- src/migrations/NombreMigracion
 ```
 
 ## Run tests

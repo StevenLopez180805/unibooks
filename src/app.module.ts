@@ -28,9 +28,9 @@ import { LibrosModule } from './libros/libros.module';
             database: config.get<string>('DATABASE_NAME'),
           }),
           autoLoadEntities: true,
-          synchronize: false, // Deshabilitado para usar migraciones
+          synchronize: false, // Siempre deshabilitado para usar migraciones
           migrations: ['dist/migrations/*.js'],
-          migrationsRun: config.get<string>('NODE_ENV') === 'production', // Ejecutar migraciones automáticamente en producción
+          migrationsRun: true, // Ejecutar migraciones automáticamente al iniciar
           logging: config.get<string>('NODE_ENV') === 'development',
         };
       },
