@@ -1,28 +1,26 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, HttpException, HttpStatus } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { PrestamosService } from './prestamos.service';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
-import { CedulaAlreadyExistsException, EmailAlreadyExistsException, UserNotFoundException } from './exceptions/user.exceptions';
+import { CreatePrestamoDto } from './dto/create-prestamo.dto';
+import { UpdatePrestamoDto } from './dto/update-prestamo.dto';
+//import { PrestamoAlreadyExistsException, UserNotFoundException } from './exceptions/prestamo.exceptions';
 
 
-@Controller('users')
-export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+
+@Controller('prestamos')
+export class PrestamosController {
+  constructor(private readonly prestamosService: PrestamosService) {}
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('bibliotecario')
   @Post()
-  async create(@Body() createUserDto: CreateUserDto) {
+  async create(@Body() createPrestamoDto: CreatePrestamoDto) {
     try {
-      return await this.usersService.create(createUserDto);
+      return await this.prestamosService.create(createPrestamoDto);
     } catch (error) {
-      if (error instanceof EmailAlreadyExistsException || error instanceof CedulaAlreadyExistsException) {
-        throw error;
-      }
       throw new HttpException(
         {
           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -39,7 +37,26 @@ export class UsersController {
   @Roles('bibliotecario')
   @Get()
   findAll() {
-    return this.usersService.findAll();
+    return this.prestamosService.findAll();
+  }
+
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('bibliotecario')
+  @Get('usuario/:userId')
+  async findByUser(@Param('userId') userId: string) {
+    try {
+      return await this.prestamosService.findByUser(+userId);
+    } catch (error) {
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: 'Error interno del servidor',
+          error: 'Internal Server Error',
+          code: 'INTERNAL_ERROR'
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -47,11 +64,8 @@ export class UsersController {
   @Get(':id')
   async findOne(@Param('id') id: string) {
     try {
-      return await this.usersService.findOne(+id);
+      return await this.prestamosService.findOne(+id);
     } catch (error) {
-      if (error instanceof UserNotFoundException) {
-        throw error;
-      }
       throw new HttpException(
         {
           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -67,14 +81,14 @@ export class UsersController {
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('bibliotecario')
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  update(@Param('id') id: string, @Body() updatePrestamoDto: UpdatePrestamoDto) {
+    return this.prestamosService.update(+id, updatePrestamoDto);
   }
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('bibliotecario')
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+    return this.prestamosService.remove(+id);
   }
 }

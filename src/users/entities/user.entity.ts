@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Prestamo } from '../../prestamos/entities/prestamo.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 
 export enum UserRole {
   bibliotecario = 'bibliotecario',
@@ -11,7 +12,19 @@ export class User {
   id: number;
 
   @Column()
-  name: string;
+  firstName: string;
+
+  @Column({ nullable: true })
+  secondName: string;
+
+  @Column()
+  lastName: string;
+
+  @Column({ nullable: true })
+  secondLastName: string;
+
+  @Column({ unique: true })
+  cedula: string;
 
   @Column({ unique: true })
   email: string;
@@ -24,5 +37,8 @@ export class User {
     enum: UserRole
   })
   role: UserRole;
+
+  @OneToMany(() => Prestamo, (prestamo) => prestamo.user)
+  prestamos: Prestamo[];
 
 }

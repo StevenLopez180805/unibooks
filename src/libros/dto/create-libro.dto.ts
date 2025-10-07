@@ -3,4 +3,5 @@ export class CreateLibroDto {
   descripcion: string;
   escritor: string;
   ubicacion: string;
+  stock: number;
 }

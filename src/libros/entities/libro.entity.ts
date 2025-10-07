@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Prestamo } from '../../prestamos/entities/prestamo.entity';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
 
 @Entity()
 export class Libro {
@@ -17,4 +18,9 @@ export class Libro {
   @Column()
   ubicacion: string;
 
+  @Column()
+  stock: number;
+
+  @ManyToMany(() => Prestamo, (prestamo) => prestamo.libro)
+  prestamos: Prestamo[];
 }

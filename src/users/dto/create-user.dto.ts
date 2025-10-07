@@ -1,7 +1,11 @@
 import { UserRole } from "../entities/user.entity";
 
 export class CreateUserDto {
-  name: string;
+  firstName: string;
+  secondName: string;
+  lastName: string;
+  secondLastName: string;
+  cedula: string;
   email: string;
   password: string;
   role: UserRole;
