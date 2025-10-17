@@ -53,8 +53,48 @@ export class UsersService {
     return this.usersRepository.findOneBy({ email });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return this.usersRepository.update(id, updateUserDto);
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    // Verificar si el usuario existe
+    const existingUser = await this.usersRepository.findOneBy({ id });
+    if (!existingUser) {
+      throw new UserNotFoundException(id);
+    }
+
+    // Verificar si el email o cédula ya existen en otros usuarios
+    if (updateUserDto.email || updateUserDto.cedula) {
+      const whereConditions: any[] = [];
+      
+      if (updateUserDto.email) {
+        whereConditions.push({ email: updateUserDto.email });
+      }
+      
+      if (updateUserDto.cedula) {
+        whereConditions.push({ cedula: updateUserDto.cedula });
+      }
+
+      const userWithSameData = await this.usersRepository.findOne({
+        where: whereConditions,
+      });
+
+      if (userWithSameData && userWithSameData.id !== id) {
+        if (updateUserDto.email && userWithSameData.email === updateUserDto.email) {
+          throw new EmailAlreadyExistsException(updateUserDto.email);
+        }
+        
+        if (updateUserDto.cedula && userWithSameData.cedula === updateUserDto.cedula) {
+          throw new CedulaAlreadyExistsException(updateUserDto.cedula);
+        }
+      }
+    }
+
+    // Si se está actualizando la contraseña, hashearla
+    let updateData = { ...updateUserDto };
+    if (updateUserDto.password) {
+      updateData.password = await bcrypt.hash(updateUserDto.password, 10);
+    }
+
+    await this.usersRepository.update(id, updateData);
+    return this.findOne(id);
   }
 
   remove(id: number) {

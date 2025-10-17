@@ -67,8 +67,25 @@ export class UsersController {
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('bibliotecario')
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    try {
+      return await this.usersService.update(+id, updateUserDto);
+    } catch (error) {
+      if (error instanceof EmailAlreadyExistsException || 
+          error instanceof CedulaAlreadyExistsException || 
+          error instanceof UserNotFoundException) {
+        throw error;
+      }
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: 'Error interno del servidor',
+          error: 'Internal Server Error',
+          code: 'INTERNAL_ERROR'
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
