@@ -89,7 +89,7 @@ export class UsersService {
 
     // Si se está actualizando la contraseña, hashearla
     let updateData = { ...updateUserDto };
-    if (updateUserDto.password) {
+    if (updateUserDto.password && updateUserDto.password !== '') {
       updateData.password = await bcrypt.hash(updateUserDto.password, 10);
     }
 
