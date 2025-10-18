@@ -31,8 +31,9 @@ export class PrestamosService {
       throw new UserNotFoundException(createPrestamoDto.user.id);
     }
     
-    // Verificar si el usuario ya tiene 5 préstamos
-    if (user.prestamos.length >= 5) {
+    // Verificar si el usuario ya tiene 5 préstamos sin devolver
+    const prestamosSinDevolver = user.prestamos.filter(prestamo => !prestamo.fechaDevolucion);
+    if (prestamosSinDevolver.length >= 5) {
       throw new UserAlreadyHasFivePrestamos(user.id.toString());
     }
     
