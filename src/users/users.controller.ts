@@ -94,4 +94,26 @@ export class UsersController {
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
   }
+
+  // Endpoints adicionales para soft delete
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('bibliotecario')
+  @Post(':id/restore')
+  restore(@Param('id') id: string) {
+    return this.usersService.restore(+id);
+  }
+
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('bibliotecario')
+  @Get('admin/all')
+  findAllWithDeleted() {
+    return this.usersService.findAllWithDeleted();
+  }
+
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('bibliotecario')
+  @Get('admin/deleted')
+  findDeleted() {
+    return this.usersService.findDeleted();
+  }
 }

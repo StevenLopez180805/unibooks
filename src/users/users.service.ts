@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Not } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -98,6 +98,24 @@ export class UsersService {
   }
 
   remove(id: number) {
-    return this.usersRepository.delete(id);
+    return this.usersRepository.softDelete(id);
+  }
+
+  // Método para restaurar un usuario eliminado (soft delete)
+  async restore(id: number) {
+    return this.usersRepository.restore(id);
+  }
+
+  // Método para obtener usuarios incluyendo los eliminados
+  findAllWithDeleted() {
+    return this.usersRepository.find({ withDeleted: true });
+  }
+
+  // Método para obtener solo los usuarios eliminados
+  findDeleted() {
+    return this.usersRepository.find({ 
+      withDeleted: true, 
+      where: { deletedAt: Not(null) } as any 
+    });
   }
 }

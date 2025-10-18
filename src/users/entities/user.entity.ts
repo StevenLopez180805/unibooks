@@ -1,5 +1,5 @@
 import { Prestamo } from '../../prestamos/entities/prestamo.entity';
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, DeleteDateColumn } from 'typeorm';
 
 export enum UserRole {
   bibliotecario = 'bibliotecario',
@@ -40,5 +40,8 @@ export class User {
 
   @OneToMany(() => Prestamo, (prestamo) => prestamo.user)
   prestamos: Prestamo[];
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 
 }

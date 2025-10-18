@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Not } from 'typeorm';
 import { Libro } from './entities/libro.entity';
 import { CreateLibroDto } from './dto/create-libro.dto';
 import { UpdateLibroDto } from './dto/update-libro.dto';
@@ -33,6 +33,24 @@ export class LibrosService {
   }
 
   remove(id: number) {
-    return this.libroRepository.delete(id);
+    return this.libroRepository.softDelete(id);
+  }
+
+  // Método para restaurar un libro eliminado (soft delete)
+  async restore(id: number) {
+    return this.libroRepository.restore(id);
+  }
+
+  // Método para obtener libros incluyendo los eliminados
+  findAllWithDeleted() {
+    return this.libroRepository.find({ withDeleted: true });
+  }
+
+  // Método para obtener solo los libros eliminados
+  findDeleted() {
+    return this.libroRepository.find({ 
+      withDeleted: true, 
+      where: { deletedAt: Not(null) } as any 
+    });
   }
 }

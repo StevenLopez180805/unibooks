@@ -46,4 +46,26 @@ export class LibrosController {
   remove(@Param('id') id: string) {
     return this.librosService.remove(+id);
   }
+
+  // Endpoints adicionales para soft delete
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('bibliotecario')
+  @Post(':id/restore')
+  restore(@Param('id') id: string) {
+    return this.librosService.restore(+id);
+  }
+
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('bibliotecario')
+  @Get('admin/all')
+  findAllWithDeleted() {
+    return this.librosService.findAllWithDeleted();
+  }
+
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('bibliotecario')
+  @Get('admin/deleted')
+  findDeleted() {
+    return this.librosService.findDeleted();
+  }
 }

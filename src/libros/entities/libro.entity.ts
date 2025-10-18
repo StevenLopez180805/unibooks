@@ -1,5 +1,5 @@
 import { Prestamo } from '../../prestamos/entities/prestamo.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, DeleteDateColumn } from 'typeorm';
 
 @Entity()
 export class Libro {
@@ -23,4 +23,7 @@ export class Libro {
 
   @ManyToMany(() => Prestamo, (prestamo) => prestamo.libro)
   prestamos: Prestamo[];
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 }
