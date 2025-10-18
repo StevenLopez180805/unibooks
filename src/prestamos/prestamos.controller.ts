@@ -40,7 +40,7 @@ export class PrestamosController {
   }
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles('bibliotecario')
+  @Roles('bibliotecario', 'estudiante')
   @Get()
   findAll(
     @Query('userId') userId?: string,
@@ -50,44 +50,6 @@ export class PrestamosController {
       userId ? +userId : undefined,
       limit ? +limit : undefined
     );
-  }
-
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles('bibliotecario')
-  @Get('usuario/:userId')
-  async findByUser(@Param('userId') userId: string) {
-    try {
-      return await this.prestamosService.findByUser(+userId);
-    } catch (error) {
-      throw new HttpException(
-        {
-          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: 'Error interno del servidor',
-          error: 'Internal Server Error',
-          code: 'INTERNAL_ERROR'
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
-    }
-  }
-
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles('bibliotecario')
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    try {
-      return await this.prestamosService.findOne(+id);
-    } catch (error) {
-      throw new HttpException(
-        {
-          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: 'Error interno del servidor',
-          error: 'Internal Server Error',
-          code: 'INTERNAL_ERROR'
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
-    }
   }
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
