@@ -80,10 +80,22 @@ export class PrestamosService {
     return prestamoGuardado;
   }
 
-  findAll() {
-    return this.prestamosRepository.find({
-      relations: ['user', 'libro']
-    });
+  async findAll(userId?: number, limit?: number) {
+    const queryBuilder = this.prestamosRepository.createQueryBuilder('prestamo')
+      .leftJoinAndSelect('prestamo.user', 'user')
+      .leftJoinAndSelect('prestamo.libro', 'libro');
+
+    // Si se especifica un userId, filtrar por ese usuario
+    if (userId) {
+      queryBuilder.where('user.id = :userId', { userId });
+    }
+
+    // Si se especifica un límite, aplicarlo
+    if (limit && limit > 0) {
+      queryBuilder.limit(limit);
+    }
+
+    return await queryBuilder.getMany();
   }
 
   async findByUser(userId: number) {

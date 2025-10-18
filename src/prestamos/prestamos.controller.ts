@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpException, HttpStatus, Query } from '@nestjs/common';
 import { PrestamosService } from './prestamos.service';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -42,8 +42,14 @@ export class PrestamosController {
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('bibliotecario')
   @Get()
-  findAll() {
-    return this.prestamosService.findAll();
+  findAll(
+    @Query('userId') userId?: string,
+    @Query('limit') limit?: string
+  ) {
+    return this.prestamosService.findAll(
+      userId ? +userId : undefined,
+      limit ? +limit : undefined
+    );
   }
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
