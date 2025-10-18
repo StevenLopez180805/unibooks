@@ -80,7 +80,9 @@ export class PrestamosService {
   }
 
   findAll() {
-    return this.prestamosRepository.find();
+    return this.prestamosRepository.find({
+      relations: ['user', 'libro']
+    });
   }
 
   async findByUser(userId: number) {
