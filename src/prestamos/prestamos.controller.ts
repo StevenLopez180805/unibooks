@@ -6,7 +6,8 @@ import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { CreatePrestamoDto } from './dto/create-prestamo.dto';
 import { UpdatePrestamoDto } from './dto/update-prestamo.dto';
-//import { PrestamoAlreadyExistsException, UserNotFoundException } from './exceptions/prestamo.exceptions';
+import { PrestamoNotFoundException, PrestamoYaDevueltoException, UserAlreadyHasFivePrestamos, LibroSinStockException } from './exceptions/prestamo.exceptions';
+import { UserNotFoundException } from '../users/exceptions/user.exceptions';
 
 
 
@@ -21,6 +22,11 @@ export class PrestamosController {
     try {
       return await this.prestamosService.create(createPrestamoDto);
     } catch (error) {
+      if (error instanceof UserAlreadyHasFivePrestamos || 
+          error instanceof LibroSinStockException || 
+          error instanceof UserNotFoundException) {
+        throw error;
+      }
       throw new HttpException(
         {
           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -83,6 +89,29 @@ export class PrestamosController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updatePrestamoDto: UpdatePrestamoDto) {
     return this.prestamosService.update(+id, updatePrestamoDto);
+  }
+
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('bibliotecario')
+  @Patch(':id/devolver')
+  async devolverLibro(@Param('id') id: string) {
+    try {
+      return await this.prestamosService.devolverLibro(+id);
+    } catch (error) {
+      if (error instanceof PrestamoNotFoundException || 
+          error instanceof PrestamoYaDevueltoException) {
+        throw error;
+      }
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: 'Error interno del servidor',
+          error: 'Internal Server Error',
+          code: 'INTERNAL_ERROR'
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)

@@ -41,3 +41,17 @@ export class LibroSinStockException extends HttpException {
     );
   }
 }
+
+export class PrestamoYaDevueltoException extends HttpException {
+  constructor(id: number) {
+    super(
+      {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: `El préstamo con ID ${id} ya fue devuelto`,
+        error: 'Bad Request',
+        code: 'PRESTAMO_YA_DEVUELTO'
+      },
+      HttpStatus.BAD_REQUEST
+    );
+  }
+}

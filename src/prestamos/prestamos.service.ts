@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreatePrestamoDto } from './dto/create-prestamo.dto';
 import { UpdatePrestamoDto } from './dto/update-prestamo.dto';
-import { UserAlreadyHasFivePrestamos, PrestamoNotFoundException, LibroSinStockException } from './exceptions/prestamo.exceptions';
+import { UserAlreadyHasFivePrestamos, PrestamoNotFoundException, LibroSinStockException, PrestamoYaDevueltoException } from './exceptions/prestamo.exceptions';
 import { Prestamo } from './entities/prestamo.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Libro } from 'src/libros/entities/libro.entity';
@@ -67,9 +67,13 @@ export class PrestamosService {
     
     // Actualizar el stock de cada libro (restar 1)
     for (const libro of librosParaPrestar) {
-      await this.librosRepository.update(libro.id, {
-        stock: libro.stock - 1
-      });
+      // Obtener el libro actualizado para asegurar que tenemos el stock correcto
+      const libroActualizado = await this.librosRepository.findOneBy({ id: libro.id });
+      if (libroActualizado) {
+        await this.librosRepository.update(libro.id, {
+          stock: libroActualizado.stock - 1
+        });
+      }
     }
     
     return prestamoGuardado;
@@ -105,6 +109,42 @@ export class PrestamosService {
     return this.prestamosRepository.update(id, UpdatePrestamoDto);
   }
 
+  async devolverLibro(id: number) {
+    // Buscar el préstamo con sus libros
+    const prestamo = await this.prestamosRepository.findOne({
+      where: { id },
+      relations: ['libro']
+    });
+
+    if (!prestamo) {
+      throw new PrestamoNotFoundException(id);
+    }
+
+    // Verificar si ya fue devuelto
+    if (prestamo.fechaDevolucion) {
+      throw new PrestamoYaDevueltoException(id);
+    }
+
+    // Actualizar la fecha de devolución
+    await this.prestamosRepository.update(id, {
+      fechaDevolucion: new Date()
+    });
+
+    // Incrementar el stock de cada libro al devolver
+    for (const libro of prestamo.libro) {
+      // Obtener el libro actualizado para asegurar que tenemos el stock correcto
+      const libroActualizado = await this.librosRepository.findOneBy({ id: libro.id });
+      if (libroActualizado) {
+        await this.librosRepository.update(libro.id, {
+          stock: libroActualizado.stock + 1
+        });
+      }
+    }
+
+    // Retornar el préstamo actualizado
+    return this.findOne(id);
+  }
+
   async remove(id: number) {
     // Buscar el préstamo con sus libros antes de eliminarlo
     const prestamo = await this.prestamosRepository.findOne({
@@ -118,9 +158,13 @@ export class PrestamosService {
 
     // Incrementar el stock de cada libro al devolver
     for (const libro of prestamo.libro) {
-      await this.librosRepository.update(libro.id, {
-        stock: libro.stock + 1
-      });
+      // Obtener el libro actualizado para asegurar que tenemos el stock correcto
+      const libroActualizado = await this.librosRepository.findOneBy({ id: libro.id });
+      if (libroActualizado) {
+        await this.librosRepository.update(libro.id, {
+          stock: libroActualizado.stock + 1
+        });
+      }
     }
 
     // Eliminar el préstamo
